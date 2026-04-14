@@ -624,10 +624,10 @@
     <div class="docs-card">
       <p>Por favor adjunte los siguientes documentos:</p>
       <div class="docs-lista">
-        <label class="doc-item"><input type="checkbox" id="doc1"> Copias de cédula de identidad de todos los accionistas</label>
-        <label class="doc-item"><input type="checkbox" id="doc2"> Certificados de votación actualizados de todos los accionistas</label>
+        <div class="doc-item"><span style="color:var(--verde);font-size:17px;font-weight:700;flex-shrink:0;">✔</span> Copias de cédula de identidad de todos los accionistas</div>
+        <div class="doc-item"><span style="color:var(--verde);font-size:17px;font-weight:700;flex-shrink:0;">✔</span> Certificados de votación actualizados de todos los accionistas</div>
+        <div class="doc-item"><span style="color:var(--verde);font-size:17px;font-weight:700;flex-shrink:0;">✔</span> <span style="font-weight:500;color:var(--texto);">NOTA: Disponer de firma electrónica vigente</span></div>
       </div>
-      <div class="doc-nota">(Vigente firma electrónica)</div>
     </div>
   </div>
 
@@ -818,16 +818,12 @@ function crearCardRepresentante(n, datos) {
   const esObligatorio = n === 1;
   const req = esObligatorio ? ' <span class="req">*</span>' : '';
 
-  // Checkboxes para cargo 1
+  // Checkboxes múltiples para cargo
+  const cargosSeleccionados = Array.isArray(datos?.cargos) ? datos.cargos : (datos?.cargo1 ? [datos.cargo1] : []);
+  const otroValor = datos?.cargo_otro || '';
   const checks1 = CARGOS_PREDEFINIDOS.map(c => {
-    const checked = (datos?.cargo1 === c) ? 'checked' : '';
-    return `<label class="check-item"><input type="radio" name="rl${n}_cargo1_radio" value="${c}" ${checked} onchange="document.getElementById('rl${n}_cargo1_txt').value=this.value"> ${c}</label>`;
-  }).join('');
-
-  // Checkboxes para cargo 2
-  const checks2 = CARGOS_PREDEFINIDOS.map(c => {
-    const checked = (datos?.cargo2 === c) ? 'checked' : '';
-    return `<label class="check-item"><input type="radio" name="rl${n}_cargo2_radio" value="${c}" ${checked} onchange="document.getElementById('rl${n}_cargo2_txt').value=this.value"> ${c}</label>`;
+    const checked = cargosSeleccionados.includes(c) ? 'checked' : '';
+    return `<label class="check-item"><input type="checkbox" name="rl${n}_cargo_check" value="${c}" ${checked}> ${c}</label>`;
   }).join('');
 
   const card = document.createElement('div');
@@ -851,19 +847,14 @@ function crearCardRepresentante(n, datos) {
       <div class="campo-contenido"><input type="text" id="rl${n}_domicilio" placeholder="Dirección completa de residencia" value="${datos?.domicilio||''}"></div>
     </div>
     <div class="campo">
-      <div class="campo-label">Cargo 1${req}</div>
+      <div class="campo-label">Cargo${req}</div>
       <div class="campo-contenido">
         <div class="check-group">${checks1}</div>
-        <input type="text" id="rl${n}_cargo1_txt" placeholder="O escribe un cargo personalizado" value="${datos?.cargo1||''}" style="margin-top:8px;">
-        <span class="hint">Selecciona una opción o escribe directamente</span>
-      </div>
-    </div>
-    <div class="campo">
-      <div class="campo-label">Cargo 2 <span style="font-size:11px;color:var(--texto-muy-suave);font-style:italic;">(opcional)</span></div>
-      <div class="campo-contenido">
-        <div class="check-group">${checks2}</div>
-        <input type="text" id="rl${n}_cargo2_txt" placeholder="O escribe un cargo personalizado" value="${datos?.cargo2||''}" style="margin-top:8px;">
-        <span class="hint">Selecciona una opción o escribe directamente</span>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+          <label class="check-item" style="white-space:nowrap;"><input type="checkbox" name="rl${n}_cargo_check" value="__otro__" id="rl${n}_cargo_otro_chk" onchange="document.getElementById('rl${n}_cargo_otro_txt').disabled=!this.checked;if(this.checked)document.getElementById('rl${n}_cargo_otro_txt').focus();"> Otro:</label>
+          <input type="text" id="rl${n}_cargo_otro_txt" placeholder="Especifique el cargo" value="${otroValor}" ${otroValor ? '' : 'disabled'} style="flex:1;">
+        </div>
+        <span class="hint">Seleccione uno o más cargos, o especifique uno personalizado</span>
       </div>
     </div>
   `;
@@ -894,8 +885,8 @@ function renumerarRepresentantes() {
       nombres:  card.querySelector(`[id$="_nombres"]`)?.value || '',
       cedula:   card.querySelector(`[id$="_cedula"]`)?.value || '',
       domicilio: card.querySelector(`[id$="_domicilio"]`)?.value || '',
-      cargo1:   card.querySelector(`[id$="_cargo1_txt"]`)?.value || '',
-      cargo2:   card.querySelector(`[id$="_cargo2_txt"]`)?.value || '',
+      cargos: Array.from(card.querySelectorAll(`input[name$="_cargo_check"]:checked`)).filter(e=>e.value!=='__otro__').map(e=>e.value),
+      cargo_otro: card.querySelector(`[id$="_cargo_otro_txt"]`)?.value || '',
     };
     const nuevo = crearCardRepresentante(n, datos);
     container.replaceChild(nuevo, card);
@@ -912,8 +903,13 @@ function recopilarRepresentantes() {
       nombres:  card.querySelector(`#rl${n}_nombres`)?.value.trim() || '',
       cedula:   card.querySelector(`#rl${n}_cedula`)?.value.trim() || '',
       domicilio: card.querySelector(`#rl${n}_domicilio`)?.value.trim() || '',
-      cargo1:   card.querySelector(`#rl${n}_cargo1_txt`)?.value.trim() || '',
-      cargo2:   card.querySelector(`#rl${n}_cargo2_txt`)?.value.trim() || '',
+      cargos:   Array.from(card.querySelectorAll(`input[name="rl${n}_cargo_check"]:checked`)).filter(e=>e.value!=='__otro__').map(e=>e.value),
+      cargo_otro: card.querySelector(`#rl${n}_cargo_otro_txt`)?.value.trim() || '',
+      cargo1:   (() => {
+        const checks = Array.from(card.querySelectorAll(`input[name="rl${n}_cargo_check"]:checked`)).filter(e=>e.value!=='__otro__').map(e=>e.value);
+        const otro = card.querySelector(`#rl${n}_cargo_otro_txt`)?.value.trim() || '';
+        return [...checks, ...(otro ? [otro] : [])].join(' / ');
+      })(),
     });
   });
   return lista;
@@ -931,7 +927,7 @@ function recopilar() {
     objeto_social: gv('objeto_social'), capital_social: gv('capital_social'), plazo: gr('plazo'),
     accionistas: recopilarAccionistas(),
     representantes: recopilarRepresentantes(),
-    doc1: gc('doc1'), doc2: gc('doc2')
+    doc1: true, doc2: true
   };
 }
 
@@ -939,7 +935,6 @@ function cargar(d) {
   sv('razon_social', d.razon_social); sv('ciudad', d.ciudad);
   sv('direccion1', d.direccion1); sv('direccion2', d.direccion2); sv('numero_dir', d.numero_dir);
   sv('objeto_social', d.objeto_social); sv('capital_social', d.capital_social); sr('plazo', d.plazo);
-  sc('doc1', d.doc1); sc('doc2', d.doc2);
 
   // Restaurar accionistas
   const container = document.getElementById('accionistas-container');
@@ -1107,7 +1102,7 @@ async function generarWord(d) {
     ]});
   }
 
-  const documentos = [d.doc1 && 'Copias de cédula de identidad de todos los accionistas', d.doc2 && 'Certificados de votación actualizados de todos los accionistas'].filter(Boolean);
+  const documentos = ['Copias de cédula de identidad de todos los accionistas', 'Certificados de votación actualizados de todos los accionistas', 'NOTA: Disponer de firma electrónica vigente'];
   const domicilio = [d.direccion1, d.direccion2, d.numero_dir ? 'N° ' + d.numero_dir : ''].filter(Boolean).join(', ');
 
   // Filas de accionistas dinámicos
@@ -1133,13 +1128,12 @@ async function generarWord(d) {
   const filasRepresentantes = [];
   representantes.forEach((r, i) => {
     if (!r.nombres && !r.cargo1) return;
-    const cargosLabel = [r.cargo1, r.cargo2].filter(Boolean).join(' / ');
+    const cargosLabel = r.cargo1 || '';
     filasRepresentantes.push(filaHeader(`PERSONA ${i+1}${cargosLabel ? ' — ' + cargosLabel.toUpperCase() : ''}`));
     filasRepresentantes.push(fila('Nombres Completos', r.nombres, i===0));
     filasRepresentantes.push(fila('Cédula de Identidad', r.cedula, i===0));
     filasRepresentantes.push(fila('Domicilio', r.domicilio, i===0));
-    filasRepresentantes.push(fila('Cargo 1', r.cargo1, i===0));
-    if (r.cargo2) filasRepresentantes.push(fila('Cargo 2', r.cargo2, false));
+    filasRepresentantes.push(fila('Cargo', r.cargo1, i===0));
   });
 
   const doc = new Document({
@@ -1263,8 +1257,7 @@ async function enviarFormulario() {
     `Nombres: ${r.nombres||'—'}`,
     `Cédula: ${r.cedula||'—'}`,
     `Domicilio: ${r.domicilio||'—'}`,
-    `Cargo 1: ${r.cargo1||'—'}`,
-    `Cargo 2: ${r.cargo2||'—'}`,
+    `Cargo: ${r.cargo1||'—'}`,
   ].join('\n')).join('\n\n');
 
   const domicilio = [d.direccion1, d.direccion2, d.numero_dir ? 'N° '+d.numero_dir : ''].filter(Boolean).join(', ');
@@ -1279,7 +1272,7 @@ async function enviarFormulario() {
     '6_Plazo_Duracion': d.plazo || '—',
     '7_Accionistas': accionistasTexto || '—',
     '8_Representantes': representantesTexto || '—',
-    '9_Documentos': [d.doc1 && 'Cédulas adjuntas', d.doc2 && 'Certificados de votación'].filter(Boolean).join(', ') || 'Ninguno confirmado',
+    '9_Documentos': 'Cédulas adjuntas, Certificados de votación, Firma electrónica vigente',
   };
 
   try {
