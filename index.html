@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulario de Constitución SAS</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul: #1a4d7c;
+    --azul-claro: #d6e8f5;
+    --azul-medio: #2e74b8;
+    --acento: #e8f4fd;
+    --borde: #d0dce8;
+    --texto: #1a2733;
+    --texto-suave: #4a6078;
+    --texto-muy-suave: #8096aa;
+    --fondo: #f4f7fa;
+    --blanco: #ffffff;
+    --rojo: #c0392b;
+    --verde: #1a7a4a;
+    --radio: 8px;
+    --radio-lg: 12px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .topbar {
+    background: var(--azul);
+    padding: 14px 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(26,77,124,0.18);
+  }
+  .topbar-titulo {
+    font-family: 'Source Serif 4', serif;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .topbar-sub {
+    color: rgba(255,255,255,0.65);
+    font-size: 12px;
+    margin-top: 1px;
+  }
+  .topbar-btns { display: flex; gap: 8px; }
+  .topbar-btns button {
+    padding: 7px 16px;
+    border-radius: var(--radio);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-guardar { background: #fff; color: var(--azul); }
+  .btn-guardar:hover { background: #e8f4fd; }
+  .btn-word { background: var(--azul-medio); color: #fff; border: 1px solid rgba(255,255,255,0.25) !important; }
+  .btn-word:hover { background: #2460a0; }
+  .btn-enviar-top { background: #1a7a4a; color: #fff; border: none !important; }
+  .btn-enviar-top:hover { background: #155f3a; }
+
+  .page { max-width: 820px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+
+  .header-card {
+    background: var(--blanco);
+    border-radius: var(--radio-lg);
+    border: 1px solid var(--borde);
+    padding: 2rem 2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .header-card h1 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--azul);
+    letter-spacing: 0.02em;
+  }
+  .header-card .subtitulo {
+    color: var(--azul-medio);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .instrucciones {
+    background: var(--acento);
+    border-left: 3px solid var(--azul-medio);
+    border-radius: 0 var(--radio) var(--radio) 0;
+    padding: 12px 16px;
+    margin-top: 1.25rem;
+    text-align: left;
+  }
+  .instrucciones p { font-size: 13px; color: var(--texto-suave); line-height: 1.6; }
+  .instrucciones p + p { margin-top: 5px; }
+  .instrucciones strong { color: var(--texto); }
+
+  .guardados-panel {
+    background: var(--blanco);
+    border-radius: var(--radio-lg);
+    border: 1px solid var(--borde);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .guardados-panel.visible { display: block; }
+  .guardados-titulo {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--azul);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+  .guardados-lista { display: flex; flex-direction: column; gap: 8px; }
+  .guardado-item {
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .guardado-nombre { font-size: 14px; font-weight: 500; color: var(--texto); }
+  .guardado-fecha { font-size: 11px; color: var(--texto-muy-suave); margin-top: 2px; }
+  .guardado-acciones { display: flex; gap: 6px; flex-shrink: 0; }
+  .gbtn {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .gbtn-cargar { background: var(--blanco); border: 1px solid var(--borde); color: var(--azul); }
+  .gbtn-cargar:hover { border-color: var(--azul-medio); background: var(--acento); }
+  .gbtn-word { background: var(--azul-medio); border: none; color: #fff; }
+  .gbtn-word:hover { background: var(--azul); }
+  .gbtn-del { background: transparent; border: 1px solid #e0b0ac; color: var(--rojo); }
+  .gbtn-del:hover { background: #fdf0ef; }
+
+  .seccion { margin-bottom: 1.5rem; }
+  .seccion-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--azul-claro);
+  }
+  .seccion-num {
+    width: 26px; height: 26px;
+    background: var(--azul);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .seccion-titulo-text {
+    font-family: 'Source Serif 4', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--azul);
+  }
+  .seccion-nota { font-size: 12px; color: var(--texto-muy-suave); font-style: italic; }
+
+  .card {
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-lg);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .accionista-head {
+    background: var(--azul);
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .campo {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    border-bottom: 1px solid var(--borde);
+  }
+  .campo:last-child { border-bottom: none; }
+  .campo-label {
+    background: #f0f5fa;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--texto-suave);
+    display: flex;
+    align-items: flex-start;
+    gap: 3px;
+    line-height: 1.5;
+    border-right: 1px solid var(--borde);
+  }
+  .req { color: var(--rojo); font-size: 12px; }
+  .campo-contenido {
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .campo-contenido input[type=text],
+  .campo-contenido input[type=email],
+  .campo-contenido input[type=number],
+  .campo-contenido textarea,
+  .campo-contenido select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    font-size: 13px;
+    color: var(--texto);
+    background: var(--blanco);
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .campo-contenido input:focus,
+  .campo-contenido textarea:focus,
+  .campo-contenido select:focus {
+    outline: none;
+    border-color: var(--azul-medio);
+    box-shadow: 0 0 0 3px rgba(46,116,184,0.12);
+  }
+  .campo-contenido textarea { resize: vertical; min-height: 72px; }
+  .sub-label { font-size: 12px; color: var(--texto-muy-suave); }
+  .hint { font-size: 11px; color: var(--texto-muy-suave); font-style: italic; }
+  .fila-inline { display: flex; gap: 8px; align-items: center; }
+  .fila-inline input { flex: 1; }
+  .fila-inline .prefix { font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+
+  .check-group { display: flex; flex-wrap: wrap; gap: 10px; padding: 4px 0; }
+  .check-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); cursor: pointer; }
+  .check-item input[type=radio],
+  .check-item input[type=checkbox] { cursor: pointer; accent-color: var(--azul-medio); width: 15px; height: 15px; }
+
+  .docs-card {
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-lg);
+    padding: 1.25rem 1.5rem;
+  }
+  .docs-card p { font-size: 13px; color: var(--texto-suave); margin-bottom: 12px; }
+  .docs-lista { display: flex; flex-direction: column; gap: 10px; }
+  .doc-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--texto-suave); cursor: pointer; }
+  .doc-item input { cursor: pointer; accent-color: var(--azul-medio); width: 16px; height: 16px; }
+  .doc-nota { font-size: 11px; color: var(--texto-muy-suave); font-style: italic; margin-top: 10px; }
+
+  .barra-acciones {
+    background: var(--blanco);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-lg);
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .barra-acciones .btn-principal {
+    padding: 9px 20px;
+    background: var(--azul);
+    color: #fff;
+    border: none;
+    border-radius: var(--radio);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+  }
+  .barra-acciones .btn-principal:hover { background: var(--azul-medio); }
+  .barra-acciones .btn-sec {
+    padding: 9px 20px;
+    background: var(--blanco);
+    color: var(--azul);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .barra-acciones .btn-sec:hover { border-color: var(--azul-medio); background: var(--acento); }
+  .barra-acciones .btn-limpiar {
+    padding: 9px 20px;
+    background: transparent;
+    color: var(--rojo);
+    border: 1px solid #e0b0ac;
+    border-radius: var(--radio);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    margin-left: auto;
+    transition: all 0.15s;
+  }
+  .barra-acciones .btn-limpiar:hover { background: #fdf0ef; }
+
+  .barra-acciones .btn-enviar {
+    padding: 9px 20px;
+    background: var(--verde);
+    color: #fff;
+    border: none;
+    border-radius: var(--radio);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+  }
+  .barra-acciones .btn-enviar:hover { background: #155f3a; }
+  .barra-acciones .btn-enviar:disabled { background: #7fb89a; cursor: not-allowed; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,35,0.55);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal {
+    background: var(--blanco);
+    border-radius: var(--radio-lg);
+    padding: 2rem;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 8px 40px rgba(26,77,124,0.22);
+    text-align: center;
+  }
+  .modal-icon { font-size: 48px; margin-bottom: 12px; }
+  .modal h3 { font-family: 'Source Serif 4', serif; color: var(--azul); font-size: 20px; margin-bottom: 8px; }
+  .modal p { font-size: 14px; color: var(--texto-suave); line-height: 1.6; margin-bottom: 20px; }
+  .modal-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .modal-btns button {
+    padding: 9px 22px;
+    border-radius: var(--radio);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    border: none;
+    transition: all 0.15s;
+  }
+  .mbtn-confirmar { background: var(--verde); color: #fff; }
+  .mbtn-confirmar:hover { background: #155f3a; }
+  .mbtn-cancelar { background: var(--fondo); color: var(--texto-suave); border: 1px solid var(--borde) !important; }
+  .mbtn-cancelar:hover { background: var(--azul-claro); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: var(--radio);
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--azul);
+    box-shadow: 0 4px 20px rgba(26,77,124,0.25);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.error { background: var(--rojo); }
+  .toast.ok { background: var(--verde); }
+
+  .btn-agregar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    background: var(--acento);
+    color: var(--azul-medio);
+    border: 1.5px dashed var(--azul-medio);
+    border-radius: var(--radio);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .btn-agregar:hover { background: var(--azul-claro); border-color: var(--azul); color: var(--azul); }
+
+  .btn-eliminar-card {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid #e0b0ac;
+    color: var(--rojo);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-eliminar-card:hover { background: #fdf0ef; }
+
+  .accionista-head {
+    display: flex;
+    align-items: center;
+  }
+
+  .cargo-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+  }
+  .cargo-item input[type=text] {
+    flex: 1;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--texto);
+    background: var(--blanco);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .cargo-item input[type=text]:focus {
+    outline: none;
+    border-color: var(--azul-medio);
+    box-shadow: 0 0 0 3px rgba(46,116,184,0.12);
+  }
+  .btn-eliminar-cargo {
+    background: transparent;
+    border: 1px solid #e0b0ac;
+    color: var(--rojo);
+    border-radius: 6px;
+    padding: 4px 9px;
+    font-size: 13px;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-eliminar-cargo:hover { background: #fdf0ef; }
+  #cargos-lista { display: flex; flex-direction: column; gap: 8px; }
+
+  @media (max-width: 620px) {
+    .topbar { flex-direction: column; gap: 10px; align-items: flex-start; }
+    .campo { grid-template-columns: 1fr; }
+    .campo-label { background: transparent; border-right: none; border-bottom: 1px solid var(--borde); padding: 10px 12px 6px; font-size: 12px; }
+    .campo-contenido { padding: 6px 12px 10px; }
+    .barra-acciones { flex-direction: column; }
+    .barra-acciones .btn-limpiar { margin-left: 0; width: 100%; }
+    .barra-acciones .btn-principal,
+    .barra-acciones .btn-sec { width: 100%; text-align: center; }
+    .guardado-item { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-titulo">Formulario de Constitución SAS</div>
+    <div class="topbar-sub">Sociedad por Acciones Simplificada</div>
+  </div>
+  <div class="topbar-btns">
+    <button class="btn-guardar" onclick="guardarFormulario()">💾 Guardar</button>
+    <button class="btn-word" onclick="descargarWord()">📄 Descargar Word</button>
+    <button class="btn-enviar-top" onclick="abrirModalEnvio()" style="padding:7px 16px;border-radius:var(--radio);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;">📤 Enviar</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="header-card">
+    <h1>FORMULARIO DE CONSTITUCIÓN</h1>
+    <div class="subtitulo">Sociedad por Acciones Simplificada (SAS)</div>
+    <div class="instrucciones">
+      <p>Por favor complete todos los campos con información clara y precisa. Los campos marcados con <strong>*</strong> son obligatorios.</p>
+      <p>Una vez completado, envíe este formulario junto con las <strong>copias de cédula y certificado de votación de todos los accionistas.</strong></p>
+      <p><em>Recuerde que la SAS puede constituirse con un solo accionista y no requiere capital mínimo.</em></p>
+    </div>
+  </div>
+
+  <div class="guardados-panel" id="guardados-panel">
+    <div class="guardados-titulo">Formularios guardados</div>
+    <div class="guardados-lista" id="guardados-lista"></div>
+  </div>
+
+  <div class="barra-acciones">
+    <button class="btn-principal" onclick="guardarFormulario()">💾 Guardar formulario</button>
+    <button class="btn-sec" onclick="descargarWord()">📄 Descargar Word (.docx)</button>
+    <button class="btn-enviar" onclick="abrirModalEnvio()">📤 Enviar formulario</button>
+    <button class="btn-limpiar" onclick="limpiarFormulario()">✕ Limpiar campos</button>
+  </div>
+
+  <!-- SECCIÓN 1 -->
+  <div class="seccion">
+    <div class="seccion-head">
+      <div class="seccion-num">1</div>
+      <div class="seccion-titulo-text">Datos de la empresa</div>
+    </div>
+    <div class="card">
+      <div class="campo">
+        <div class="campo-label">Razón Social <span class="req">*</span></div>
+        <div class="campo-contenido">
+          <input type="text" id="razon_social" placeholder="Nombre completo de la empresa">
+        </div>
+      </div>
+      <div class="campo">
+        <div class="campo-label">Domicilio <span class="req">*</span></div>
+        <div class="campo-contenido">
+          <div class="fila-inline">
+            <span class="prefix">Ciudad:</span>
+            <input type="text" id="ciudad" placeholder="Ej: Quito">
+          </div>
+          <div class="sub-label">Dirección completa:</div>
+          <input type="text" id="direccion1" placeholder="Calle principal y número">
+          <input type="text" id="direccion2" placeholder="Calle secundaria / referencia">
+          <div class="fila-inline">
+            <span class="prefix">Número:</span>
+            <input type="text" id="numero_dir" placeholder="Ej: N12-34" style="max-width:180px;">
+          </div>
+        </div>
+      </div>
+      <div class="campo">
+        <div class="campo-label">Objeto Social <span class="req">*</span></div>
+        <div class="campo-contenido">
+          <span class="hint">(Describir las actividades principales)</span>
+          <textarea id="objeto_social" rows="4" placeholder="Describa detalladamente las actividades económicas de la empresa..."></textarea>
+        </div>
+      </div>
+      <div class="campo">
+        <div class="campo-label">Capital Social <span class="req">*</span></div>
+        <div class="campo-contenido">
+          <div class="fila-inline">
+            <span class="prefix">USD $</span>
+            <input type="number" id="capital_social" placeholder="20" min="1" style="max-width:160px;">
+          </div>
+          <span class="hint">(Puede ser desde $1 en adelante — Recomendación: $100)</span>
+        </div>
+      </div>
+      <div class="campo">
+        <div class="campo-label">Plazo de Duración <span class="req">*</span></div>
+        <div class="campo-contenido">
+          <div class="check-group">
+            <label class="check-item"><input type="radio" name="plazo" value="Indefinido"> Indefinido</label>
+            <label class="check-item"><input type="radio" name="plazo" value="5 años"> 5 años</label>
+          </div>
+          <span class="hint">(Recomendación: 5 años)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2 -->
+  <div class="seccion">
+    <div class="seccion-head">
+      <div class="seccion-num">2</div>
+      <div class="seccion-titulo-text">Datos de los accionistas</div>
+    </div>
+    <div class="seccion-nota" style="margin-bottom:12px;">(Complete una sección por cada accionista. Puede agregar tantos accionistas como sean necesarios)</div>
+
+    <div id="accionistas-container"></div>
+
+    <button class="btn-agregar" onclick="agregarAccionista()">
+      <span style="font-size:18px;line-height:1">+</span> Agregar accionista
+    </button>
+  </div>
+
+  <!-- SECCIÓN 3 -->
+  <div class="seccion">
+    <div class="seccion-head">
+      <div class="seccion-num">3</div>
+      <div class="seccion-titulo-text">Representante Legal</div>
+    </div>
+    <div class="seccion-nota" style="margin-bottom:12px;">(Puede ser la misma persona que el accionista. Agregue una tarjeta por cada persona con cargo directivo)</div>
+
+    <div id="representantes-container"></div>
+
+    <button class="btn-agregar" onclick="agregarRepresentante()">
+      <span style="font-size:18px;line-height:1">+</span> Agregar representante / cargo
+    </button>
+  </div>
+
+  <!-- SECCIÓN 4 -->
+  <div class="seccion">
+    <div class="seccion-head">
+      <div class="seccion-num">4</div>
+      <div class="seccion-titulo-text">Documentos Adjuntos</div>
+    </div>
+    <div class="docs-card">
+      <p>Por favor adjunte los siguientes documentos:</p>
+      <div class="docs-lista">
+        <label class="doc-item"><input type="checkbox" id="doc1"> Copias de cédula de identidad de todos los accionistas</label>
+        <label class="doc-item"><input type="checkbox" id="doc2"> Certificados de votación actualizados de todos los accionistas</label>
+      </div>
+      <div class="doc-nota">(Vigente firma electrónica)</div>
+    </div>
+  </div>
+
+  <div class="barra-acciones">
+    <button class="btn-principal" onclick="guardarFormulario()">💾 Guardar formulario</button>
+    <button class="btn-sec" onclick="descargarWord()">📄 Descargar Word (.docx)</button>
+    <button class="btn-enviar" onclick="abrirModalEnvio()">📤 Enviar formulario</button>
+    <button class="btn-limpiar" onclick="limpiarFormulario()">✕ Limpiar campos</button>
+  </div>
+
+</div>
+
+<!-- MODAL CONFIRMACIÓN ENVÍO -->
+<div class="modal-overlay" id="modal-envio">
+  <div class="modal">
+    <div class="modal-icon">📤</div>
+    <h3>Enviar formulario</h3>
+    <p>Se enviarán todos los datos completados al equipo responsable.<br>Asegúrese de haber revisado la información antes de continuar.</p>
+    <div class="modal-btns">
+      <button class="mbtn-cancelar" onclick="cerrarModal()">Cancelar</button>
+      <button class="mbtn-confirmar" id="btn-confirmar-envio" onclick="enviarFormulario()">Confirmar envío</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ÉXITO -->
+<div class="modal-overlay" id="modal-exito">
+  <div class="modal">
+    <div class="modal-icon">✅</div>
+    <h3>¡Formulario enviado!</h3>
+    <p>Sus datos han sido recibidos correctamente. El equipo se pondrá en contacto con usted a la brevedad.</p>
+    <div class="modal-btns">
+      <button class="mbtn-confirmar" onclick="cerrarModalExito()">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ERROR -->
+<div class="modal-overlay" id="modal-error">
+  <div class="modal">
+    <div class="modal-icon">⚠️</div>
+    <h3>Error al enviar</h3>
+    <p id="modal-error-msg">Hubo un problema al enviar el formulario. Por favor intente nuevamente o contáctenos directamente.</p>
+    <div class="modal-btns">
+      <button class="mbtn-cancelar" onclick="cerrarModalError()">Cerrar</button>
+      <button class="mbtn-confirmar" onclick="cerrarModalError();abrirModalEnvio()">Reintentar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script>
+function gv(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function gr(name) { const e = document.querySelector('input[name="'+name+'"]:checked'); return e ? e.value : ''; }
+function gc(id) { const e = document.getElementById(id); return e ? e.checked : false; }
+function sv(id, val) { const e = document.getElementById(id); if (e) e.value = val || ''; }
+function sr(name, val) { const e = document.querySelector('input[name="'+name+'"][value="'+val+'"]'); if (e) e.checked = true; }
+function sc(id, val) { const e = document.getElementById(id); if (e) e.checked = !!val; }
+
+// ── ACCIONISTAS DINÁMICOS ─────────────────────────────────────────────────────
+let accionistaCount = 0;
+
+function crearCardAccionista(n, datos) {
+  const esObligatorio = n === 1;
+  const req = esObligatorio ? ' <span class="req">*</span>' : '';
+  const civil = datos && datos.civil ? datos.civil : '';
+  const opciones = ['Soltero/a','Casado/a','Divorciado/a','Unión de hecho'];
+  const radios = opciones.map(op =>
+    `<label class="check-item"><input type="radio" name="ac${n}_civil" value="${op}"${civil===op?' checked':''}> ${op}</label>`
+  ).join('');
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = `accionista-card-${n}`;
+  card.innerHTML = `
+    <div class="accionista-head">
+      Accionista ${n}${esObligatorio ? '' : ' (Opcional)'}
+      ${n > 1 ? `<button class="btn-eliminar-card" onclick="eliminarAccionista(${n})" title="Eliminar accionista">✕ Eliminar</button>` : ''}
+    </div>
+    <div class="campo">
+      <div class="campo-label">Nombres Completos${req}</div>
+      <div class="campo-contenido"><input type="text" id="ac${n}_nombres" placeholder="Nombres y apellidos completos" value="${datos?.nombres||''}"></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Cédula / Pasaporte${req}</div>
+      <div class="campo-contenido"><input type="text" id="ac${n}_cedula" placeholder="Número de documento de identidad" value="${datos?.cedula||''}"></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Nacionalidad${req}</div>
+      <div class="campo-contenido"><input type="text" id="ac${n}_nacionalidad" value="${datos?.nacionalidad||'Ecuatoriana'}"></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Estado Civil${req}</div>
+      <div class="campo-contenido"><div class="check-group">${radios}</div></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Domicilio${req}</div>
+      <div class="campo-contenido"><input type="text" id="ac${n}_domicilio" placeholder="Dirección completa de residencia" value="${datos?.domicilio||''}"></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Correo Electrónico${req}</div>
+      <div class="campo-contenido"><input type="email" id="ac${n}_email" placeholder="correo@ejemplo.com" value="${datos?.email||''}"></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Número de Acciones${req}</div>
+      <div class="campo-contenido">
+        <input type="text" id="ac${n}_acciones" placeholder="${n===1?'100%':'%'}" style="max-width:160px;" value="${datos?.acciones||''}">
+        ${n===1 ? '<span class="hint">(100% de acciones si solo es un socio)</span>' : ''}
+      </div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Valor del Aporte${req}</div>
+      <div class="campo-contenido">
+        <div class="fila-inline">
+          <span class="prefix">USD $</span>
+          <input type="number" id="ac${n}_aporte" placeholder="${n===1?'20':'0'}" min="0" style="max-width:160px;" value="${datos?.aporte||''}">
+        </div>
+        ${n===1 ? '<span class="hint">(Recomendación: $100)</span>' : ''}
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function agregarAccionista(datos) {
+  accionistaCount++;
+  const container = document.getElementById('accionistas-container');
+  container.appendChild(crearCardAccionista(accionistaCount, datos));
+}
+
+function eliminarAccionista(n) {
+  if (!confirm(`¿Eliminar Accionista ${n}?`)) return;
+  const card = document.getElementById(`accionista-card-${n}`);
+  if (card) card.remove();
+  renumerarAccionistas();
+}
+
+function renumerarAccionistas() {
+  const container = document.getElementById('accionistas-container');
+  const cards = container.querySelectorAll('.card');
+  accionistaCount = 0;
+  cards.forEach((card, i) => {
+    accionistaCount++;
+    const n = accionistaCount;
+    // Recopilar datos actuales antes de re-renderizar
+    const datos = {
+      nombres: card.querySelector(`[id$="_nombres"]`)?.value || '',
+      cedula: card.querySelector(`[id$="_cedula"]`)?.value || '',
+      nacionalidad: card.querySelector(`[id$="_nacionalidad"]`)?.value || '',
+      civil: card.querySelector(`input[type="radio"]:checked`)?.value || '',
+      domicilio: card.querySelector(`[id$="_domicilio"]`)?.value || '',
+      email: card.querySelector(`[id$="_email"]`)?.value || '',
+      acciones: card.querySelector(`[id$="_acciones"]`)?.value || '',
+      aporte: card.querySelector(`[id$="_aporte"]`)?.value || '',
+    };
+    const nuevo = crearCardAccionista(n, datos);
+    container.replaceChild(nuevo, card);
+  });
+}
+
+function recopilarAccionistas() {
+  const container = document.getElementById('accionistas-container');
+  const cards = container.querySelectorAll('.card');
+  const lista = [];
+  cards.forEach((card, i) => {
+    const n = i + 1;
+    lista.push({
+      nombres: card.querySelector(`#ac${n}_nombres`)?.value.trim() || '',
+      cedula: card.querySelector(`#ac${n}_cedula`)?.value.trim() || '',
+      nacionalidad: card.querySelector(`#ac${n}_nacionalidad`)?.value.trim() || '',
+      civil: card.querySelector(`input[name="ac${n}_civil"]:checked`)?.value || '',
+      domicilio: card.querySelector(`#ac${n}_domicilio`)?.value.trim() || '',
+      email: card.querySelector(`#ac${n}_email`)?.value.trim() || '',
+      acciones: card.querySelector(`#ac${n}_acciones`)?.value.trim() || '',
+      aporte: card.querySelector(`#ac${n}_aporte`)?.value.trim() || '',
+    });
+  });
+  return lista;
+}
+
+// ── REPRESENTANTES DINÁMICOS ──────────────────────────────────────────────────
+const CARGOS_PREDEFINIDOS = ['Representante Legal', 'Presidente/a', 'Gerente General', 'Administrador/a', 'Secretario/a'];
+let representanteCount = 0;
+
+function crearCardRepresentante(n, datos) {
+  const esObligatorio = n === 1;
+  const req = esObligatorio ? ' <span class="req">*</span>' : '';
+  const opciones = CARGOS_PREDEFINIDOS.map(c =>
+    `<option value="${c}"${datos?.cargo===c?' selected':''}>${c}</option>`
+  ).join('');
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = `representante-card-${n}`;
+  card.innerHTML = `
+    <div class="accionista-head">
+      Representante ${n}${esObligatorio ? '' : ' (Opcional)'}
+      ${n > 1 ? `<button class="btn-eliminar-card" onclick="eliminarRepresentante(${n})" title="Eliminar representante">✕ Eliminar</button>` : ''}
+    </div>
+    <div class="campo">
+      <div class="campo-label">Nombres Completos${req}</div>
+      <div class="campo-contenido"><input type="text" id="rl${n}_nombres" placeholder="Nombres y apellidos completos" value="${datos?.nombres||''}"></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Cédula de Identidad${req}</div>
+      <div class="campo-contenido"><input type="text" id="rl${n}_cedula" placeholder="Número de cédula" value="${datos?.cedula||''}"></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Domicilio${req}</div>
+      <div class="campo-contenido"><input type="text" id="rl${n}_domicilio" placeholder="Dirección completa de residencia" value="${datos?.domicilio||''}"></div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Cargo${req}</div>
+      <div class="campo-contenido">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="rl${n}_cargo" placeholder="Ej: Representante Legal" value="${datos?.cargo||''}" style="flex:1;">
+          <select onchange="document.getElementById('rl${n}_cargo').value=this.value;this.value=''" style="flex-shrink:0;padding:7px 8px;border:1px solid var(--borde);border-radius:var(--radio);font-size:12px;color:var(--texto-suave);background:var(--blanco);font-family:'DM Sans',sans-serif;cursor:pointer;">
+            <option value="">— Predefinidos —</option>
+            ${opciones}
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+  return card;
+}
+
+function agregarRepresentante(datos) {
+  representanteCount++;
+  const container = document.getElementById('representantes-container');
+  container.appendChild(crearCardRepresentante(representanteCount, datos));
+}
+
+function eliminarRepresentante(n) {
+  if (!confirm(`¿Eliminar Representante ${n}?`)) return;
+  const card = document.getElementById(`representante-card-${n}`);
+  if (card) card.remove();
+  renumerarRepresentantes();
+}
+
+function renumerarRepresentantes() {
+  const container = document.getElementById('representantes-container');
+  const cards = Array.from(container.querySelectorAll('.card'));
+  representanteCount = 0;
+  cards.forEach((card) => {
+    representanteCount++;
+    const n = representanteCount;
+    const datos = {
+      nombres: card.querySelector(`[id$="_nombres"]`)?.value || '',
+      cedula: card.querySelector(`[id$="_cedula"]`)?.value || '',
+      domicilio: card.querySelector(`[id$="_domicilio"]`)?.value || '',
+      cargo: card.querySelector(`[id$="_cargo"]`)?.value || '',
+    };
+    const nuevo = crearCardRepresentante(n, datos);
+    container.replaceChild(nuevo, card);
+  });
+}
+
+function recopilarRepresentantes() {
+  const container = document.getElementById('representantes-container');
+  const cards = container.querySelectorAll('.card');
+  const lista = [];
+  cards.forEach((card, i) => {
+    const n = i + 1;
+    lista.push({
+      nombres: card.querySelector(`#rl${n}_nombres`)?.value.trim() || '',
+      cedula: card.querySelector(`#rl${n}_cedula`)?.value.trim() || '',
+      domicilio: card.querySelector(`#rl${n}_domicilio`)?.value.trim() || '',
+      cargo: card.querySelector(`#rl${n}_cargo`)?.value.trim() || '',
+    });
+  });
+  return lista;
+}
+
+// ── INICIALIZAR ───────────────────────────────────────────────────────────────
+agregarAccionista();
+agregarRepresentante({ cargo: 'Representante Legal' });
+
+// ── RECOPILAR / CARGAR ────────────────────────────────────────────────────────
+function recopilar() {
+  return {
+    razon_social: gv('razon_social'), ciudad: gv('ciudad'),
+    direccion1: gv('direccion1'), direccion2: gv('direccion2'), numero_dir: gv('numero_dir'),
+    objeto_social: gv('objeto_social'), capital_social: gv('capital_social'), plazo: gr('plazo'),
+    accionistas: recopilarAccionistas(),
+    representantes: recopilarRepresentantes(),
+    doc1: gc('doc1'), doc2: gc('doc2')
+  };
+}
+
+function cargar(d) {
+  sv('razon_social', d.razon_social); sv('ciudad', d.ciudad);
+  sv('direccion1', d.direccion1); sv('direccion2', d.direccion2); sv('numero_dir', d.numero_dir);
+  sv('objeto_social', d.objeto_social); sv('capital_social', d.capital_social); sr('plazo', d.plazo);
+  sc('doc1', d.doc1); sc('doc2', d.doc2);
+
+  // Restaurar accionistas
+  const container = document.getElementById('accionistas-container');
+  container.innerHTML = '';
+  accionistaCount = 0;
+  const accionistas = d.accionistas || [];
+  if (!accionistas.length) {
+    if (d.a1_nombres) accionistas.push({ nombres: d.a1_nombres, cedula: d.a1_cedula, nacionalidad: d.a1_nacionalidad, civil: d.a1_civil, domicilio: d.a1_domicilio, email: d.a1_email, acciones: d.a1_acciones, aporte: d.a1_aporte });
+    if (d.a2_nombres) accionistas.push({ nombres: d.a2_nombres, cedula: d.a2_cedula, email: d.a2_email, acciones: d.a2_acciones, aporte: d.a2_aporte });
+  }
+  if (!accionistas.length) accionistas.push({});
+  accionistas.forEach(a => agregarAccionista(a));
+
+  // Restaurar representantes
+  const rContainer = document.getElementById('representantes-container');
+  rContainer.innerHTML = '';
+  representanteCount = 0;
+  const representantes = d.representantes || [];
+  // Compatibilidad con formato anterior
+  if (!representantes.length) {
+    const cargos = d.cargos || [];
+    if (d.rl_nombres) {
+      representantes.push({ nombres: d.rl_nombres, cedula: d.rl_cedula, domicilio: d.rl_domicilio, cargo: cargos[0] || (d.fac_legal ? 'Representante Legal' : d.fac_pres ? 'Presidente/a' : '') });
+      if (cargos.length > 1) cargos.slice(1).forEach(c => representantes.push({ cargo: c }));
+    }
+  }
+  if (!representantes.length) representantes.push({ cargo: 'Representante Legal' });
+  representantes.forEach(r => agregarRepresentante(r));
+}
+
+function toast(msg, tipo) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (tipo ? ' ' + tipo : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = 'toast', 2800);
+}
+
+function guardarFormulario() {
+  const d = recopilar();
+  if (!d.razon_social) { toast('Ingresa la Razón Social primero', 'error'); return; }
+  const lista = JSON.parse(localStorage.getItem('sas_forms') || '[]');
+  const entry = { id: Date.now(), fecha: new Date().toLocaleString('es-EC'), datos: d };
+  const idx = lista.findIndex(e => e.datos.razon_social === d.razon_social);
+  if (idx >= 0) { lista[idx] = entry; toast('Formulario actualizado ✓', 'ok'); }
+  else { lista.push(entry); toast('Formulario guardado ✓', 'ok'); }
+  localStorage.setItem('sas_forms', JSON.stringify(lista));
+  renderGuardados();
+}
+
+function limpiarFormulario() {
+  if (!confirm('¿Limpiar todos los campos del formulario?')) return;
+  document.querySelectorAll('input[type=text], input[type=email], input[type=number], textarea').forEach(e => e.value = '');
+  document.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(e => e.checked = false);
+  // Reset accionistas
+  const container = document.getElementById('accionistas-container');
+  container.innerHTML = '';
+  accionistaCount = 0;
+  agregarAccionista();
+  document.getElementById('ac1_nacionalidad').value = 'Ecuatoriana';
+  // Reset representantes
+  const rContainer = document.getElementById('representantes-container');
+  rContainer.innerHTML = '';
+  representanteCount = 0;
+  agregarRepresentante({ cargo: 'Representante Legal' });
+  toast('Campos limpiados');
+}
+
+function renderGuardados() {
+  const lista = JSON.parse(localStorage.getItem('sas_forms') || '[]');
+  const panel = document.getElementById('guardados-panel');
+  const cont = document.getElementById('guardados-lista');
+  if (!lista.length) { panel.classList.remove('visible'); return; }
+  panel.classList.add('visible');
+  cont.innerHTML = lista.map(e => `
+    <div class="guardado-item">
+      <div>
+        <div class="guardado-nombre">${e.datos.razon_social || '(sin nombre)'}</div>
+        <div class="guardado-fecha">${e.fecha}</div>
+      </div>
+      <div class="guardado-acciones">
+        <button class="gbtn gbtn-cargar" onclick="cargarGuardado(${e.id})">Cargar</button>
+        <button class="gbtn gbtn-word" onclick="descargarWordId(${e.id})">Word</button>
+        <button class="gbtn gbtn-del" onclick="eliminarGuardado(${e.id})">Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function cargarGuardado(id) {
+  const lista = JSON.parse(localStorage.getItem('sas_forms') || '[]');
+  const e = lista.find(x => x.id === id);
+  if (e) { cargar(e.datos); toast('Formulario cargado ✓', 'ok'); window.scrollTo({top: 0, behavior: 'smooth'}); }
+}
+
+function eliminarGuardado(id) {
+  if (!confirm('¿Eliminar este formulario guardado?')) return;
+  let lista = JSON.parse(localStorage.getItem('sas_forms') || '[]');
+  lista = lista.filter(x => x.id !== id);
+  localStorage.setItem('sas_forms', JSON.stringify(lista));
+  renderGuardados();
+  toast('Formulario eliminado', 'error');
+}
+
+function descargarWordId(id) {
+  const lista = JSON.parse(localStorage.getItem('sas_forms') || '[]');
+  const e = lista.find(x => x.id === id);
+  if (e) generarWord(e.datos);
+}
+
+function descargarWord() {
+  const d = recopilar();
+  if (!d.razon_social) { toast('Completa la Razón Social primero', 'error'); return; }
+  generarWord(d);
+}
+
+async function generarWord(d) {
+  if (typeof docx === 'undefined') { toast('Cargando librería, intente nuevamente...', 'error'); return; }
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+          WidthType, BorderStyle, AlignmentType, ShadingType, HeadingLevel } = docx;
+
+  const AZUL = '1A4D7C';
+  const AZUL_CLARO = 'D6E8F5';
+  const AZUL_OSCURO = '0F3358';
+  const GRIS = 'F0F5FA';
+
+  const borde = { top:{style:BorderStyle.SINGLE,size:4,color:'D0DCE8'}, bottom:{style:BorderStyle.SINGLE,size:4,color:'D0DCE8'}, left:{style:BorderStyle.SINGLE,size:4,color:'D0DCE8'}, right:{style:BorderStyle.SINGLE,size:4,color:'D0DCE8'} };
+
+  function secTitulo(num, txt) {
+    return new Paragraph({
+      children: [new TextRun({ text: `${num}. ${txt.toUpperCase()}`, bold: true, color: AZUL, size: 26, font: 'Calibri' })],
+      spacing: { before: 400, after: 160 },
+      border: { bottom: { color: AZUL_CLARO, space: 1, style: BorderStyle.SINGLE, size: 12 } }
+    });
+  }
+
+  function fila(label, valor, requerido, shade) {
+    return new TableRow({ children: [
+      new TableCell({
+        width: { size: 33, type: WidthType.PERCENTAGE },
+        shading: { fill: shade || AZUL_CLARO, type: ShadingType.CLEAR },
+        children: [new Paragraph({ children: [new TextRun({ text: label + (requerido ? ' *' : ''), bold: true, size: 19, color: '1A2733', font: 'Calibri' })] })],
+        margins: { top: 100, bottom: 100, left: 120, right: 120 },
+        borders: borde
+      }),
+      new TableCell({
+        width: { size: 67, type: WidthType.PERCENTAGE },
+        children: [new Paragraph({ children: [new TextRun({ text: valor || '—', size: 19, color: valor ? '111111' : 'AAAAAA', font: 'Calibri' })] })],
+        margins: { top: 100, bottom: 100, left: 120, right: 120 },
+        borders: borde
+      })
+    ]});
+  }
+
+  function filaHeader(txt) {
+    return new TableRow({ children: [
+      new TableCell({
+        columnSpan: 2,
+        shading: { fill: AZUL, type: ShadingType.CLEAR },
+        children: [new Paragraph({ children: [new TextRun({ text: txt, bold: true, color: 'FFFFFF', size: 20, font: 'Calibri' })] })],
+        margins: { top: 90, bottom: 90, left: 120, right: 120 },
+        borders: borde
+      })
+    ]});
+  }
+
+  const documentos = [d.doc1 && 'Copias de cédula de identidad de todos los accionistas', d.doc2 && 'Certificados de votación actualizados de todos los accionistas'].filter(Boolean);
+  const domicilio = [d.direccion1, d.direccion2, d.numero_dir ? 'N° ' + d.numero_dir : ''].filter(Boolean).join(', ');
+
+  // Filas de accionistas dinámicos
+  const accionistas = d.accionistas || [];
+  const filasAccionistas = [];
+  accionistas.forEach((a, i) => {
+    if (!a.nombres) return;
+    filasAccionistas.push(filaHeader(`ACCIONISTA ${i+1}`));
+    filasAccionistas.push(fila('Nombres Completos', a.nombres, i===0, GRIS));
+    filasAccionistas.push(fila('Cédula / Pasaporte', a.cedula, i===0, GRIS));
+    if (i === 0) {
+      filasAccionistas.push(fila('Nacionalidad', a.nacionalidad, true, GRIS));
+      filasAccionistas.push(fila('Estado Civil', a.civil, true, GRIS));
+      filasAccionistas.push(fila('Domicilio', a.domicilio, true, GRIS));
+    }
+    filasAccionistas.push(fila('Correo Electrónico', a.email, i===0, GRIS));
+    filasAccionistas.push(fila('Número de Acciones', a.acciones, i===0, GRIS));
+    filasAccionistas.push(fila('Valor del Aporte', a.aporte ? 'USD $ ' + a.aporte : '', i===0, GRIS));
+  });
+
+  // Filas de representantes dinámicos
+  const representantes = d.representantes || [];
+  const filasRepresentantes = [];
+  representantes.forEach((r, i) => {
+    if (!r.nombres && !r.cargo) return;
+    if (representantes.filter(x => x.nombres || x.cargo).length > 1) {
+      filasRepresentantes.push(filaHeader(`REPRESENTANTE ${i+1}${r.cargo ? ' — ' + r.cargo.toUpperCase() : ''}`));
+    }
+    filasRepresentantes.push(fila('Nombres Completos', r.nombres, i===0));
+    filasRepresentantes.push(fila('Cédula de Identidad', r.cedula, i===0));
+    filasRepresentantes.push(fila('Domicilio', r.domicilio, i===0));
+    filasRepresentantes.push(fila('Cargo', r.cargo, i===0));
+  });
+
+  const doc = new Document({
+    sections: [{
+      properties: { page: { margin: { top: 800, bottom: 800, left: 1000, right: 1000 } } },
+      children: [
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 100 },
+          children: [new TextRun({ text: 'FORMULARIO DE CONSTITUCIÓN', bold: true, size: 40, color: AZUL, font: 'Calibri' })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 80 },
+          children: [new TextRun({ text: 'Sociedad por Acciones Simplificada (SAS)', size: 24, color: '2E74B8', font: 'Calibri' })]
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 },
+          border: { bottom: { color: AZUL_CLARO, style: BorderStyle.SINGLE, size: 6, space: 4 } },
+          children: [new TextRun({ text: `Generado: ${new Date().toLocaleString('es-EC')}`, size: 16, color: '888888', italics: true, font: 'Calibri' })]
+        }),
+
+        secTitulo(1, 'Datos de la empresa'),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            fila('Razón Social', d.razon_social, true),
+            fila('Ciudad', d.ciudad, true),
+            fila('Dirección completa', domicilio, true),
+            fila('Objeto Social', d.objeto_social, true),
+            fila('Capital Social', d.capital_social ? 'USD $ ' + d.capital_social : '', true),
+            fila('Plazo de Duración', d.plazo, true),
+          ]
+        }),
+
+        secTitulo(2, 'Datos de los accionistas'),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: filasAccionistas.length ? filasAccionistas : [fila('Estado', 'Sin accionistas registrados', false)]
+        }),
+
+        secTitulo(3, 'Representante Legal'),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: filasRepresentantes.length ? filasRepresentantes : [fila('Estado', 'Sin representantes registrados', false)]
+        }),
+
+        secTitulo(4, 'Documentos adjuntos'),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: documentos.length
+            ? documentos.map(doc => fila('', doc, false))
+            : [fila('Estado', 'Sin documentos confirmados', false)]
+        }),
+
+        new Paragraph({ spacing: { before: 500 }, children: [] }),
+        new Paragraph({
+          children: [new TextRun({ text: '* Campos obligatorios', size: 16, color: '999999', italics: true, font: 'Calibri' })]
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: 'Este documento fue generado automáticamente mediante el Formulario de Constitución SAS.', size: 16, color: 'AAAAAA', italics: true, font: 'Calibri' })]
+        }),
+      ]
+    }]
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Constitucion_SAS_' + (d.razon_social || 'empresa').replace(/[^a-z0-9áéíóúñ]/gi, '_') + '.docx';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Descarga iniciada ✓', 'ok');
+}
+
+// ── FORMSPREE ENVÍO ───────────────────────────────────────────────────────────
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xnjlqyrz';
+
+function abrirModalEnvio() {
+  const d = recopilar();
+  if (!d.razon_social) { toast('Completa la Razón Social antes de enviar', 'error'); return; }
+  if (!d.accionistas[0]?.nombres) { toast('Completa los datos del Accionista 1 antes de enviar', 'error'); return; }
+  document.getElementById('modal-envio').classList.add('visible');
+}
+
+function cerrarModal() {
+  document.getElementById('modal-envio').classList.remove('visible');
+}
+function cerrarModalExito() {
+  document.getElementById('modal-exito').classList.remove('visible');
+}
+function cerrarModalError() {
+  document.getElementById('modal-error').classList.remove('visible');
+}
+
+async function enviarFormulario() {
+  const btn = document.getElementById('btn-confirmar-envio');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const d = recopilar();
+
+  const accionistasTexto = (d.accionistas || []).map((a, i) => [
+    `--- Accionista ${i+1} ---`,
+    `Nombres: ${a.nombres||'—'}`,
+    `Cédula/Pasaporte: ${a.cedula||'—'}`,
+    `Nacionalidad: ${a.nacionalidad||'—'}`,
+    `Estado Civil: ${a.civil||'—'}`,
+    `Domicilio: ${a.domicilio||'—'}`,
+    `Email: ${a.email||'—'}`,
+    `Acciones: ${a.acciones||'—'}`,
+    `Aporte: ${a.aporte ? 'USD $ '+a.aporte : '—'}`,
+  ].join('\n')).join('\n\n');
+
+  const representantesTexto = (d.representantes || []).map((r, i) => [
+    `--- Representante ${i+1} ---`,
+    `Nombres: ${r.nombres||'—'}`,
+    `Cédula: ${r.cedula||'—'}`,
+    `Domicilio: ${r.domicilio||'—'}`,
+    `Cargo: ${r.cargo||'—'}`,
+  ].join('\n')).join('\n\n');
+
+  const domicilio = [d.direccion1, d.direccion2, d.numero_dir ? 'N° '+d.numero_dir : ''].filter(Boolean).join(', ');
+
+  const payload = {
+    _subject: `Constitución SAS — ${d.razon_social || 'Nueva solicitud'}`,
+    '1_Razon_Social': d.razon_social || '—',
+    '2_Ciudad': d.ciudad || '—',
+    '3_Domicilio': domicilio || '—',
+    '4_Objeto_Social': d.objeto_social || '—',
+    '5_Capital_Social': d.capital_social ? 'USD $ '+d.capital_social : '—',
+    '6_Plazo_Duracion': d.plazo || '—',
+    '7_Accionistas': accionistasTexto || '—',
+    '8_Representantes': representantesTexto || '—',
+    '9_Documentos': [d.doc1 && 'Cédulas adjuntas', d.doc2 && 'Certificados de votación'].filter(Boolean).join(', ') || 'Ninguno confirmado',
+  };
+
+  try {
+    const res = await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    cerrarModal();
+    btn.disabled = false;
+    btn.textContent = 'Confirmar envío';
+    if (res.ok) {
+      document.getElementById('modal-exito').classList.add('visible');
+      guardarFormulario();
+    } else {
+      document.getElementById('modal-error-msg').textContent = json?.errors?.[0]?.message || 'Error desconocido. Intente nuevamente.';
+      document.getElementById('modal-error').classList.add('visible');
+    }
+  } catch(e) {
+    cerrarModal();
+    btn.disabled = false;
+    btn.textContent = 'Confirmar envío';
+    document.getElementById('modal-error-msg').textContent = 'Sin conexión a internet. Verifique su red e intente nuevamente.';
+    document.getElementById('modal-error').classList.add('visible');
+  }
+}
+
+renderGuardados();
+</script>
+</body>
+</html>
