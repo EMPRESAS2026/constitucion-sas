@@ -604,14 +604,14 @@
   <div class="seccion">
     <div class="seccion-head">
       <div class="seccion-num">3</div>
-      <div class="seccion-titulo-text">Representante Legal</div>
+      <div class="seccion-titulo-text">Administradores</div>
     </div>
     <div class="seccion-nota" style="margin-bottom:12px;">(Puede ser la misma persona que el accionista. Agregue una tarjeta por cada persona con cargo directivo)</div>
 
     <div id="representantes-container"></div>
 
     <button class="btn-agregar" onclick="agregarRepresentante()">
-      <span style="font-size:18px;line-height:1">+</span> Agregar representante / cargo
+      <span style="font-size:18px;line-height:1">+</span> Agregar administrador
     </button>
   </div>
 
@@ -811,23 +811,32 @@ function recopilarAccionistas() {
 }
 
 // ── REPRESENTANTES DINÁMICOS ──────────────────────────────────────────────────
-const CARGOS_PREDEFINIDOS = ['Representante Legal', 'Presidente/a', 'Gerente General', 'Administrador/a', 'Secretario/a'];
+const CARGOS_PREDEFINIDOS = ['Representante Legal', 'Presidente/a', 'Gerente General', 'Administrador/a', 'Secretario/a', 'Tesorero/a'];
 let representanteCount = 0;
 
 function crearCardRepresentante(n, datos) {
   const esObligatorio = n === 1;
   const req = esObligatorio ? ' <span class="req">*</span>' : '';
-  const opciones = CARGOS_PREDEFINIDOS.map(c =>
-    `<option value="${c}"${datos?.cargo===c?' selected':''}>${c}</option>`
-  ).join('');
+
+  // Checkboxes para cargo 1
+  const checks1 = CARGOS_PREDEFINIDOS.map(c => {
+    const checked = (datos?.cargo1 === c) ? 'checked' : '';
+    return `<label class="check-item"><input type="radio" name="rl${n}_cargo1_radio" value="${c}" ${checked} onchange="document.getElementById('rl${n}_cargo1_txt').value=this.value"> ${c}</label>`;
+  }).join('');
+
+  // Checkboxes para cargo 2
+  const checks2 = CARGOS_PREDEFINIDOS.map(c => {
+    const checked = (datos?.cargo2 === c) ? 'checked' : '';
+    return `<label class="check-item"><input type="radio" name="rl${n}_cargo2_radio" value="${c}" ${checked} onchange="document.getElementById('rl${n}_cargo2_txt').value=this.value"> ${c}</label>`;
+  }).join('');
 
   const card = document.createElement('div');
   card.className = 'card';
   card.id = `representante-card-${n}`;
   card.innerHTML = `
     <div class="accionista-head">
-      Representante ${n}${esObligatorio ? '' : ' (Opcional)'}
-      ${n > 1 ? `<button class="btn-eliminar-card" onclick="eliminarRepresentante(${n})" title="Eliminar representante">✕ Eliminar</button>` : ''}
+      Persona ${n}${esObligatorio ? '' : ' (Opcional)'}
+      ${n > 1 ? `<button class="btn-eliminar-card" onclick="eliminarRepresentante(${n})" title="Eliminar">✕ Eliminar</button>` : ''}
     </div>
     <div class="campo">
       <div class="campo-label">Nombres Completos${req}</div>
@@ -842,15 +851,19 @@ function crearCardRepresentante(n, datos) {
       <div class="campo-contenido"><input type="text" id="rl${n}_domicilio" placeholder="Dirección completa de residencia" value="${datos?.domicilio||''}"></div>
     </div>
     <div class="campo">
-      <div class="campo-label">Cargo${req}</div>
+      <div class="campo-label">Cargo 1${req}</div>
       <div class="campo-contenido">
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="text" id="rl${n}_cargo" placeholder="Ej: Representante Legal" value="${datos?.cargo||''}" style="flex:1;">
-          <select onchange="document.getElementById('rl${n}_cargo').value=this.value;this.value=''" style="flex-shrink:0;padding:7px 8px;border:1px solid var(--borde);border-radius:var(--radio);font-size:12px;color:var(--texto-suave);background:var(--blanco);font-family:'DM Sans',sans-serif;cursor:pointer;">
-            <option value="">— Predefinidos —</option>
-            ${opciones}
-          </select>
-        </div>
+        <div class="check-group">${checks1}</div>
+        <input type="text" id="rl${n}_cargo1_txt" placeholder="O escribe un cargo personalizado" value="${datos?.cargo1||''}" style="margin-top:8px;">
+        <span class="hint">Selecciona una opción o escribe directamente</span>
+      </div>
+    </div>
+    <div class="campo">
+      <div class="campo-label">Cargo 2 <span style="font-size:11px;color:var(--texto-muy-suave);font-style:italic;">(opcional)</span></div>
+      <div class="campo-contenido">
+        <div class="check-group">${checks2}</div>
+        <input type="text" id="rl${n}_cargo2_txt" placeholder="O escribe un cargo personalizado" value="${datos?.cargo2||''}" style="margin-top:8px;">
+        <span class="hint">Selecciona una opción o escribe directamente</span>
       </div>
     </div>
   `;
@@ -864,7 +877,7 @@ function agregarRepresentante(datos) {
 }
 
 function eliminarRepresentante(n) {
-  if (!confirm(`¿Eliminar Representante ${n}?`)) return;
+  if (!confirm(`¿Eliminar Persona ${n}?`)) return;
   const card = document.getElementById(`representante-card-${n}`);
   if (card) card.remove();
   renumerarRepresentantes();
@@ -878,10 +891,11 @@ function renumerarRepresentantes() {
     representanteCount++;
     const n = representanteCount;
     const datos = {
-      nombres: card.querySelector(`[id$="_nombres"]`)?.value || '',
-      cedula: card.querySelector(`[id$="_cedula"]`)?.value || '',
+      nombres:  card.querySelector(`[id$="_nombres"]`)?.value || '',
+      cedula:   card.querySelector(`[id$="_cedula"]`)?.value || '',
       domicilio: card.querySelector(`[id$="_domicilio"]`)?.value || '',
-      cargo: card.querySelector(`[id$="_cargo"]`)?.value || '',
+      cargo1:   card.querySelector(`[id$="_cargo1_txt"]`)?.value || '',
+      cargo2:   card.querySelector(`[id$="_cargo2_txt"]`)?.value || '',
     };
     const nuevo = crearCardRepresentante(n, datos);
     container.replaceChild(nuevo, card);
@@ -895,10 +909,11 @@ function recopilarRepresentantes() {
   cards.forEach((card, i) => {
     const n = i + 1;
     lista.push({
-      nombres: card.querySelector(`#rl${n}_nombres`)?.value.trim() || '',
-      cedula: card.querySelector(`#rl${n}_cedula`)?.value.trim() || '',
+      nombres:  card.querySelector(`#rl${n}_nombres`)?.value.trim() || '',
+      cedula:   card.querySelector(`#rl${n}_cedula`)?.value.trim() || '',
       domicilio: card.querySelector(`#rl${n}_domicilio`)?.value.trim() || '',
-      cargo: card.querySelector(`#rl${n}_cargo`)?.value.trim() || '',
+      cargo1:   card.querySelector(`#rl${n}_cargo1_txt`)?.value.trim() || '',
+      cargo2:   card.querySelector(`#rl${n}_cargo2_txt`)?.value.trim() || '',
     });
   });
   return lista;
@@ -906,7 +921,7 @@ function recopilarRepresentantes() {
 
 // ── INICIALIZAR ───────────────────────────────────────────────────────────────
 agregarAccionista();
-agregarRepresentante({ cargo: 'Representante Legal' });
+agregarRepresentante({ cargo1: 'Representante Legal' });
 
 // ── RECOPILAR / CARGAR ────────────────────────────────────────────────────────
 function recopilar() {
@@ -947,11 +962,12 @@ function cargar(d) {
   if (!representantes.length) {
     const cargos = d.cargos || [];
     if (d.rl_nombres) {
-      representantes.push({ nombres: d.rl_nombres, cedula: d.rl_cedula, domicilio: d.rl_domicilio, cargo: cargos[0] || (d.fac_legal ? 'Representante Legal' : d.fac_pres ? 'Presidente/a' : '') });
-      if (cargos.length > 1) cargos.slice(1).forEach(c => representantes.push({ cargo: c }));
+      representantes.push({ nombres: d.rl_nombres, cedula: d.rl_cedula, domicilio: d.rl_domicilio, cargo1: cargos[0] || (d.fac_legal ? 'Representante Legal' : d.fac_pres ? 'Presidente/a' : ''), cargo2: cargos[1] || '' });
     }
+    // migrar cargo antiguo si existe
+    representantes.forEach(r => { if (r.cargo && !r.cargo1) { r.cargo1 = r.cargo; delete r.cargo; } });
   }
-  if (!representantes.length) representantes.push({ cargo: 'Representante Legal' });
+  if (!representantes.length) representantes.push({ cargo1: 'Representante Legal' });
   representantes.forEach(r => agregarRepresentante(r));
 }
 
@@ -989,7 +1005,7 @@ function limpiarFormulario() {
   const rContainer = document.getElementById('representantes-container');
   rContainer.innerHTML = '';
   representanteCount = 0;
-  agregarRepresentante({ cargo: 'Representante Legal' });
+  agregarRepresentante({ cargo1: 'Representante Legal' });
   toast('Campos limpiados');
 }
 
@@ -1116,14 +1132,14 @@ async function generarWord(d) {
   const representantes = d.representantes || [];
   const filasRepresentantes = [];
   representantes.forEach((r, i) => {
-    if (!r.nombres && !r.cargo) return;
-    if (representantes.filter(x => x.nombres || x.cargo).length > 1) {
-      filasRepresentantes.push(filaHeader(`REPRESENTANTE ${i+1}${r.cargo ? ' — ' + r.cargo.toUpperCase() : ''}`));
-    }
+    if (!r.nombres && !r.cargo1) return;
+    const cargosLabel = [r.cargo1, r.cargo2].filter(Boolean).join(' / ');
+    filasRepresentantes.push(filaHeader(`PERSONA ${i+1}${cargosLabel ? ' — ' + cargosLabel.toUpperCase() : ''}`));
     filasRepresentantes.push(fila('Nombres Completos', r.nombres, i===0));
     filasRepresentantes.push(fila('Cédula de Identidad', r.cedula, i===0));
     filasRepresentantes.push(fila('Domicilio', r.domicilio, i===0));
-    filasRepresentantes.push(fila('Cargo', r.cargo, i===0));
+    filasRepresentantes.push(fila('Cargo 1', r.cargo1, i===0));
+    if (r.cargo2) filasRepresentantes.push(fila('Cargo 2', r.cargo2, false));
   });
 
   const doc = new Document({
@@ -1166,7 +1182,7 @@ async function generarWord(d) {
           rows: filasAccionistas.length ? filasAccionistas : [fila('Estado', 'Sin accionistas registrados', false)]
         }),
 
-        secTitulo(3, 'Representante Legal'),
+        secTitulo(3, 'Administradores'),
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           rows: filasRepresentantes.length ? filasRepresentantes : [fila('Estado', 'Sin representantes registrados', false)]
@@ -1243,11 +1259,12 @@ async function enviarFormulario() {
   ].join('\n')).join('\n\n');
 
   const representantesTexto = (d.representantes || []).map((r, i) => [
-    `--- Representante ${i+1} ---`,
+    `--- Persona ${i+1} ---`,
     `Nombres: ${r.nombres||'—'}`,
     `Cédula: ${r.cedula||'—'}`,
     `Domicilio: ${r.domicilio||'—'}`,
-    `Cargo: ${r.cargo||'—'}`,
+    `Cargo 1: ${r.cargo1||'—'}`,
+    `Cargo 2: ${r.cargo2||'—'}`,
   ].join('\n')).join('\n\n');
 
   const domicilio = [d.direccion1, d.direccion2, d.numero_dir ? 'N° '+d.numero_dir : ''].filter(Boolean).join(', ');
