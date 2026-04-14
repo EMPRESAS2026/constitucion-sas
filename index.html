@@ -1214,7 +1214,7 @@ async function generarWord(d) {
 }
 
 // ── FORMSPREE ENVÍO ───────────────────────────────────────────────────────────
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xnjlqyrz';
+const GOOGLE_SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx641vJwhjjST_0Rpg7Dr985vCvNjLBeUNSwlHZfTT2GstcgFN1dlBcR57T5QVUziTzWg/exec';
 
 function abrirModalEnvio() {
   const d = recopilar();
@@ -1276,22 +1276,17 @@ async function enviarFormulario() {
   };
 
   try {
-    const res = await fetch(FORMSPREE_ENDPOINT, {
+    await fetch(GOOGLE_SHEET_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload),
+      mode: 'no-cors'
     });
-    const json = await res.json();
     cerrarModal();
     btn.disabled = false;
     btn.textContent = 'Confirmar envío';
-    if (res.ok) {
-      document.getElementById('modal-exito').classList.add('visible');
-      guardarFormulario();
-    } else {
-      document.getElementById('modal-error-msg').textContent = json?.errors?.[0]?.message || 'Error desconocido. Intente nuevamente.';
-      document.getElementById('modal-error').classList.add('visible');
-    }
+    document.getElementById('modal-exito').classList.add('visible');
+    guardarFormulario();
   } catch(e) {
     cerrarModal();
     btn.disabled = false;
